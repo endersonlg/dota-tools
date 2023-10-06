@@ -26,8 +26,8 @@ export function Input({
         borderColor={'gray.500'}
         backgroundColor="rgba(255, 255, 255, 0.1)"
         h={12}
-        color={'gray.100'}
-        placeholderTextColor={'gray.200'}
+        color={'gray.200'}
+        placeholderTextColor={'gray.300'}
         fontSize={'md'}
         fontFamily={'body'}
         cursorColor={colors.gray[200]}

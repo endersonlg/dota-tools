@@ -1,51 +1,71 @@
-import {
-  NativeStackNavigationProp,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack'
-
-import { Home } from '../screens/Home'
-import { ListUsers } from '../screens/List'
-import { User } from '../screens/User'
-
 import { Header } from '../components/Header'
+import { Twitch } from '../screens/Twitch'
+import { Suggest } from '../screens/Suggest'
+
+import {
+  BottomTabNavigationProp,
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs'
+import { UserRoutes } from './user.routes'
+import { useTheme } from 'native-base'
+import { FontAwesome } from '@expo/vector-icons'
+import { useTranslation } from 'react-i18next'
 
 type AppRoutes = {
-  home: undefined
-  listUsers: {
-    search: string
-  }
-  user: {
-    userId: number
-  }
+  userRoutes: undefined
+  twitch: undefined
+  draft: undefined
 }
 
-export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>
+export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
 
 export function AppRoutes() {
-  const { Navigator, Screen } = createNativeStackNavigator<AppRoutes>()
-  return (
-    <Navigator initialRouteName="home">
-      <Screen
-        name="home"
-        component={Home}
-        options={{
-          headerShown: false,
-        }}
-      />
+  const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>()
 
+  const { t } = useTranslation()
+  const { colors } = useTheme()
+
+  return (
+    <Navigator
+      screenOptions={{
+        header: () => <Header />,
+        tabBarActiveTintColor: colors.gray[200],
+        tabBarInactiveTintColor: colors.gray[500],
+        tabBarLabelStyle: {
+          fontSize: 12,
+          textAlign: 'center',
+        },
+
+        tabBarStyle: {
+          borderTopWidth: 0,
+          backgroundColor: colors.gray[800],
+        },
+      }}
+    >
       <Screen
-        name="listUsers"
-        component={ListUsers}
+        name="userRoutes"
+        component={UserRoutes}
         options={{
-          header: () => <Header />,
+          title: t('user_information'),
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="user" size={20} color={color} />
+          ),
         }}
       />
       <Screen
-        name="user"
-        component={User}
+        name="draft"
+        component={Suggest}
         options={{
-          header: () => <Header />,
+          title: t('pick_helper'),
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="list" size={20} color={color} />
+          ),
         }}
+      />
+      <Screen
+        name="twitch"
+        component={Twitch}
+        options={{ tabBarButton: () => null }}
       />
     </Navigator>
   )

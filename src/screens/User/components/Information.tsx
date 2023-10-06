@@ -1,7 +1,16 @@
-import { Divider, HStack, Skeleton, Text, VStack } from 'native-base'
+import {
+  Divider,
+  HStack,
+  ScrollView,
+  Skeleton,
+  Text,
+  VStack,
+  useToast,
+} from 'native-base'
 import { Medal } from './Medal'
 import { api } from '../../../service/api'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface InformationProps {
   userId: number
@@ -23,6 +32,9 @@ export function Information({ userId }: InformationProps) {
   const [user, setUser] = useState<User | null>(null)
   const [winLose, setWinLose] = useState<WinLoss>({ win: null, lose: null })
 
+  const toast = useToast()
+  const { t } = useTranslation()
+
   useEffect(() => {
     async function loadUsers() {
       try {
@@ -34,7 +46,13 @@ export function Information({ userId }: InformationProps) {
           stars: data.rank_tier ? String(data.rank_tier).at(1)! : null,
         })
       } catch (e) {
-        console.log('erro')
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
+        })
       }
     }
 
@@ -46,13 +64,19 @@ export function Information({ userId }: InformationProps) {
           lose: data.lose,
         })
       } catch (e) {
-        console.log('erro')
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
+        })
       }
     }
 
     loadUsers()
     loadWinLoss()
-  }, [userId])
+  }, [t, userId])
 
   const { win, lose } = winLose
 
@@ -70,31 +94,33 @@ export function Information({ userId }: InformationProps) {
 
         <VStack flex={1} space={1}>
           <Skeleton rounded={'2xl'} />
-          <HStack space={4} justifyContent={'space-between'}>
-            <HStack space={4}>
-              <VStack>
-                <Text color={'gray.300'}>WIN</Text>
-                <Skeleton.Text lines={1} />
-              </VStack>
+          <ScrollView horizontal>
+            <HStack space={4} justifyContent={'space-between'}>
+              <HStack space={4}>
+                <VStack>
+                  <Text color={'gray.300'}>{t('win').toUpperCase()}</Text>
+                  <Skeleton.Text lines={1} />
+                </VStack>
+
+                <VStack>
+                  <Text color={'gray.300'}>{t('loss').toUpperCase()}</Text>
+                  <Skeleton.Text lines={1} />
+                </VStack>
+
+                <VStack>
+                  <Text color={'gray.300'}>{t('winrate').toUpperCase()}</Text>
+                  <Skeleton.Text lines={1} />
+                </VStack>
+              </HStack>
+
+              <Divider orientation="vertical" />
 
               <VStack>
-                <Text color={'gray.300'}>LOSS</Text>
-                <Skeleton.Text lines={1} />
-              </VStack>
-
-              <VStack>
-                <Text color={'gray.300'}>WINRATE</Text>
+                <Text color={'gray.300'}>MMR</Text>
                 <Skeleton.Text lines={1} />
               </VStack>
             </HStack>
-
-            <Divider orientation="vertical" />
-
-            <VStack>
-              <Text color={'gray.300'}>MMR</Text>
-              <Skeleton.Text lines={1} />
-            </VStack>
-          </HStack>
+          </ScrollView>
         </VStack>
       </HStack>
     )
@@ -115,33 +141,42 @@ export function Information({ userId }: InformationProps) {
         >
           {user.name}
         </Text>
-        <HStack space={4} justifyContent={'space-between'}>
-          <HStack space={4}>
-            <VStack>
-              <Text color={'gray.300'}>WIN</Text>
-              <Text color={'green.600'}>{win}</Text>
-            </VStack>
+        <ScrollView horizontal>
+          <HStack space={4} justifyContent={'space-between'}>
+            <HStack space={4}>
+              <VStack>
+                <Text color={'gray.300'}>{t('win').toUpperCase()}</Text>
+                <Text color={'green.600'} textAlign={'center'}>
+                  {win}
+                </Text>
+              </VStack>
+
+              <VStack>
+                <Text color={'gray.300'}>{t('loss').toUpperCase()}</Text>
+                <Text color={'red.500'} textAlign={'center'}>
+                  {lose}
+                </Text>
+              </VStack>
+
+              <VStack>
+                <Text color={'gray.300'}>{t('winrate').toUpperCase()}</Text>
+                <Text
+                  color={winRate >= 50 ? 'green.600' : 'red.500'}
+                  textAlign={'center'}
+                >{`${winRate.toFixed(2)}%`}</Text>
+              </VStack>
+            </HStack>
+
+            <Divider orientation="vertical" />
 
             <VStack>
-              <Text color={'gray.300'}>LOSS</Text>
-              <Text color={'red.500'}>{lose}</Text>
-            </VStack>
-
-            <VStack>
-              <Text color={'gray.300'}>WINRATE</Text>
-              <Text
-                color={winRate >= 50 ? 'green.600' : 'red.500'}
-              >{`${winRate.toFixed(2)}%`}</Text>
+              <Text color={'gray.300'}>MMR</Text>
+              <Text color={'gray.300'} textAlign={'center'}>
+                {user.mmr}
+              </Text>
             </VStack>
           </HStack>
-
-          <Divider orientation="vertical" />
-
-          <VStack>
-            <Text color={'gray.300'}>MMR</Text>
-            <Text color={'gray.300'}>{user.mmr}</Text>
-          </VStack>
-        </HStack>
+        </ScrollView>
       </VStack>
     </HStack>
   )

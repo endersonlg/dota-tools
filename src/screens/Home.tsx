@@ -1,4 +1,4 @@
-import { HStack, Image, SearchIcon, Text, VStack } from 'native-base'
+import { HStack, Heading, Image, SearchIcon, VStack } from 'native-base'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,7 +8,8 @@ import { Button } from '../components/Button'
 
 import LogoSvg from '../assets/logo.png'
 import { useNavigation } from '@react-navigation/native'
-import { AppNavigatorRoutesProps } from '../routes/app.routes'
+import { AppStackNavigatorRoutesProps } from '../routes/user.routes'
+import { useTranslation } from 'react-i18next'
 
 const homeSchema = z.object({
   search: z
@@ -30,7 +31,9 @@ export function Home() {
     resolver: zodResolver(homeSchema),
   })
 
-  const navigation = useNavigation<AppNavigatorRoutesProps>()
+  const { t } = useTranslation()
+
+  const navigation = useNavigation<AppStackNavigatorRoutesProps>()
 
   function handleSearch({ search }: HomeSchema) {
     navigation.navigate('listUsers', {
@@ -48,9 +51,9 @@ export function Home() {
         resizeMode="cover"
         mb={2}
       />
-      <Text color={'white'} fontSize={'2xl'} mb={6}>
+      <Heading color={'white'} fontSize={'2xl'} mb={6}>
         DOTA TOOLS
-      </Text>
+      </Heading>
       <HStack space={2}>
         <Controller
           control={control}
@@ -58,7 +61,7 @@ export function Home() {
           render={({ field: { onChange, value } }) => (
             <Input
               flex={1}
-              placeholder="Type your account"
+              placeholder={t('type_your_account')}
               onChangeText={onChange}
               value={value}
               errorMessage={errors.search?.message}

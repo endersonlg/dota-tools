@@ -1,14 +1,18 @@
 import { ReactNode, createContext, useEffect, useState } from 'react'
 import { api } from '../service/api'
+import { useToast } from 'native-base'
+import { useTranslation } from 'react-i18next'
 
 interface ResponseHero {
-  id: number
-  name: string
-  localized_name: string
-  attack_type: string
+  [key: string]: {
+    id: number
+    name: string
+    localized_name: string
+    attack_type: string
+  }
 }
 
-interface Hero {
+export interface Hero {
   id: number
   name: string
   isRange: boolean
@@ -32,37 +36,47 @@ export function HeroesContextProvider({
   const [heroes, setHeroes] = useState<Hero[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const toast = useToast()
+  const { t } = useTranslation()
+
   useEffect(() => {
-    function loadHeroes() {
+    async function loadHeroes() {
       setIsLoading(true)
-      api
-        .get<ResponseHero[]>('/heroes')
-        .then(({ data }) => {
-          setHeroes(
-            data.map((hero) => {
-              const [, nameSplit] = hero.name.split('npc_dota_hero_')
 
-              const avatar = `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${nameSplit}.png`
+      try {
+        const { data } = await api.get<ResponseHero>('/constants/heroes')
 
-              return {
-                id: hero.id,
-                name: hero.localized_name,
-                isRange: hero.attack_type === 'Ranged',
-                avatar,
-              }
-            }),
-          )
+        const keys = Object.keys(data)
+
+        setHeroes(
+          keys.map((key) => {
+            const [, nameSplit] = data[key].name.split('npc_dota_hero_')
+
+            const avatar = `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${nameSplit}.png`
+
+            return {
+              id: data[key].id,
+              name: data[key].localized_name,
+              isRange: data[key].attack_type === 'Ranged',
+              avatar,
+            }
+          }),
+        )
+      } catch (e) {
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
         })
-        .catch((err) => {
-          console.log(err)
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     loadHeroes()
-  }, [])
+  }, [t])
 
   return (
     <HeroesContext.Provider value={{ heroes, isLoading }}>

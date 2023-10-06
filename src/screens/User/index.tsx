@@ -12,12 +12,10 @@ type RouteParamsProps = {
   userId: number
 }
 
-const userId = 173317533
-
 export function User() {
   const route = useRoute()
 
-  // const { userId } = route.params as RouteParamsProps
+  const { userId } = route.params as RouteParamsProps
 
   return (
     <VStack flex={1}>

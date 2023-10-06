@@ -1,5 +1,4 @@
-import { NativeBaseProvider, Box, Image } from 'native-base'
-import { Home } from './src/screens/Home'
+import { NativeBaseProvider } from 'native-base'
 
 import {
   useFonts,
@@ -8,11 +7,15 @@ import {
 } from '@expo-google-fonts/roboto'
 import { StatusBar, View } from 'react-native'
 import { THEME } from './src/theme'
-import { Layout } from './src/components/Layout'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Routes } from './src/routes'
 import { HeroesContextProvider } from './src/context/HeroesContext'
 import { ItemsContextProvider } from './src/context/ItemsContext'
+import i18next from 'i18next'
+
+import 'dayjs/locale/pt-br'
+import './src/i18n/config'
+import { getLocales } from 'expo-localization'
 
 const config = {
   dependencies: {
@@ -22,6 +25,8 @@ const config = {
 
 export default function App() {
   const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold })
+
+  i18next.changeLanguage(getLocales()[0].languageTag)
 
   return (
     <NativeBaseProvider theme={THEME} config={config}>

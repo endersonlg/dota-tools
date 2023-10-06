@@ -1,5 +1,5 @@
-import { HStack, VStack, Image, Text, Divider } from 'native-base'
-import { FlatList, TouchableOpacity } from 'react-native'
+import { HStack, VStack, Image, Text, Divider, useToast } from 'native-base'
+import { FlatList, ListRenderItemInfo, TouchableOpacity } from 'react-native'
 import { useEffect, useState } from 'react'
 import { api } from '../service/api'
 import dayjs from 'dayjs'
@@ -9,7 +9,8 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import Animated, { FadeInUp } from 'react-native-reanimated'
 import { TechiesLoading } from '../components/TechiesLoading'
 
-import { AppNavigatorRoutesProps } from '../routes/app.routes'
+import { AppStackNavigatorRoutesProps } from '../routes/user.routes'
+import { useTranslation } from 'react-i18next'
 
 const TouchableOpacityAnimated =
   Animated.createAnimatedComponent(TouchableOpacity)
@@ -32,7 +33,10 @@ export function ListUsers() {
 
   const route = useRoute()
 
-  const navigation = useNavigation<AppNavigatorRoutesProps>()
+  const navigation = useNavigation<AppStackNavigatorRoutesProps>()
+
+  const toast = useToast()
+  const { i18n, t } = useTranslation()
 
   const { search } = route.params as RouteParamsProps
 
@@ -42,12 +46,18 @@ export function ListUsers() {
         const { data } = await api.get(`/search?q=${search}`)
         setUsers(data)
       } catch (e) {
-        console.log(e)
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
+        })
       }
     }
 
     loadUsers()
-  }, [search])
+  }, [search, toast])
 
   function handleNavigate(userId: number) {
     navigation.navigate('user', {
@@ -55,8 +65,48 @@ export function ListUsers() {
     })
   }
 
+  function renderItem({ item, index }: ListRenderItemInfo<User>) {
+    return (
+      <TouchableOpacityAnimated
+        onPress={() => handleNavigate(item.account_id)}
+        entering={FadeInUp.delay(index * 100)}
+      >
+        <HStack width={'full'} alignItems={'center'} space={'4'}>
+          <Image
+            source={{
+              uri: item.avatarfull,
+              width: 12 * 4,
+            }}
+            alt={item.personaname}
+            w={12}
+            h={12}
+            rounded={'full'}
+            resizeMode="cover"
+          />
+          <Text
+            color={'gray.100'}
+            fontSize={'lg'}
+            flexShrink={1}
+            noOfLines={1}
+            isTruncated={true}
+          >
+            {item.personaname}
+          </Text>
+          <Text color={'gray.500'} ml={'auto'}>
+            {dayjs(new Date(item.last_match_time))
+              .locale(i18n.language)
+              .fromNow()}
+          </Text>
+        </HStack>
+      </TouchableOpacityAnimated>
+    )
+  }
+
   return (
     <VStack flex={1}>
+      <Text color={'gray.300'} textAlign={'right'} mb={1}>
+        {t('last_access')}
+      </Text>
       {users.length ? (
         <FlatList
           data={users}
@@ -65,38 +115,7 @@ export function ListUsers() {
             <Divider orientation="horizontal" my={'4'} />
           )}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <TouchableOpacityAnimated
-              onPress={() => handleNavigate(item.account_id)}
-              entering={FadeInUp.delay(index * 100)}
-            >
-              <HStack width={'full'} alignItems={'center'} space={'4'}>
-                <Image
-                  source={{
-                    uri: item.avatarfull,
-                    width: 12 * 4,
-                  }}
-                  alt={item.personaname}
-                  w={12}
-                  h={12}
-                  rounded={'full'}
-                  resizeMode="cover"
-                />
-                <Text
-                  color={'gray.100'}
-                  fontSize={'lg'}
-                  flexShrink={1}
-                  noOfLines={1}
-                  isTruncated={true}
-                >
-                  {item.personaname}
-                </Text>
-                <Text color={'gray.500'} ml={'auto'}>
-                  {dayjs(new Date(item.last_match_time)).fromNow()}
-                </Text>
-              </HStack>
-            </TouchableOpacityAnimated>
-          )}
+          renderItem={renderItem}
         />
       ) : (
         <TechiesLoading w={32} h={32} />

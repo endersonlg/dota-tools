@@ -8,9 +8,9 @@ import {
   Skeleton,
   Text,
   VStack,
-  useTheme,
+  useToast,
 } from 'native-base'
-import { TouchableOpacity } from 'react-native'
+import { ListRenderItemInfo } from 'react-native'
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -20,6 +20,8 @@ import { useHeroes } from '../../../hook/useHeroes'
 import Animated, { FadeInUp } from 'react-native-reanimated'
 import { Item } from '../../../context/ItemsContext'
 import { useItems } from '../../../hook/useItems'
+import { useTranslation } from 'react-i18next'
+import { firstLetterUppercase } from '../../../utils/firstLetterUppercase'
 
 dayjs.extend(duration)
 
@@ -66,6 +68,9 @@ export function RecentMatches({ userId }: MatchesProps) {
   const { heroes: totalHeroes, isLoading: isLoadingHeroes } = useHeroes()
 
   const { items: totalItems, isLoading: isLoadingItems } = useItems()
+
+  const toast = useToast()
+  const { t } = useTranslation()
 
   useEffect(() => {
     async function loadMatches() {
@@ -121,19 +126,134 @@ export function RecentMatches({ userId }: MatchesProps) {
           }),
         )
       } catch (err) {
-        console.log(err)
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
+        })
       }
     }
 
     if (!isLoadingHeroes && !isLoadingItems) {
       loadMatches()
     }
-  }, [userId, isLoadingHeroes, totalHeroes, isLoadingItems, totalItems])
+  }, [userId, isLoadingHeroes, totalHeroes, isLoadingItems, totalItems, t])
+
+  function renderItem({ item, index }: ListRenderItemInfo<Match>) {
+    return (
+      <HStackAnimated
+        space={3}
+        alignItems={'center'}
+        entering={FadeInUp.delay(index * 100)}
+      >
+        <HStack space={2} width={'2/5'} alignItems={'center'}>
+          <Image
+            source={{
+              uri: item.heroAvatar,
+              width: 10 * 4,
+              height: 10 * 4,
+            }}
+            alt={item.heroName}
+            width={10}
+            h={10}
+            rounded={'full'}
+            resizeMode="cover"
+          />
+          <VStack flex={1}>
+            <Text color={'gray.300'} flexShrink={1} isTruncated={true}>
+              {item.heroName}
+            </Text>
+            <Text color={'gray.300'}>Level: {item.level}</Text>
+          </VStack>
+        </HStack>
+
+        <Text color={item.win ? 'green.600' : 'red.500'}>
+          {item.win
+            ? `${firstLetterUppercase(t('win'))}`
+            : `${firstLetterUppercase(t('loss'))}`}
+        </Text>
+
+        <VStack space={'0.5'}>
+          <HStack space={'0.5'} justifyContent={'space-between'}>
+            {item.items.slice(0, 3).map((itemAux, itemAuxIndex) => (
+              <Box
+                w={4}
+                h={4}
+                overflow={'hidden'}
+                borderWidth={1}
+                borderColor={'gray.500'}
+                rounded={'sm'}
+                bg={'gray.700'}
+                key={`item-${itemAuxIndex}`}
+              >
+                {itemAux?.img && (
+                  <Image
+                    source={{
+                      uri: itemAux.img,
+                      width: 4 * 4,
+                      height: 4 * 4,
+                    }}
+                    resizeMode="cover"
+                    alt={itemAux?.name}
+                    w={'full'}
+                    h={'full'}
+                  />
+                )}
+              </Box>
+            ))}
+          </HStack>
+
+          <HStack space={'0.5'} justifyContent={'space-between'}>
+            {item.items.slice(3, 6).map((itemAux, itemAuxIndex) => (
+              <Box
+                w={4}
+                h={4}
+                overflow={'hidden'}
+                borderWidth={1}
+                borderColor={'gray.500'}
+                rounded={'sm'}
+                bg={'gray.700'}
+                key={`item-${itemAuxIndex}`}
+              >
+                {itemAux?.img && (
+                  <Image
+                    source={{
+                      uri: itemAux.img,
+                      width: 4 * 4,
+                      height: 4 * 4,
+                    }}
+                    alt={itemAux?.name}
+                    w={'full'}
+                    h={'full'}
+                  />
+                )}
+              </Box>
+            ))}
+          </HStack>
+        </VStack>
+
+        <VStack marginLeft={'auto'}>
+          <HStack>
+            <Text color={'gray.300'}>{item.kills}</Text>
+            <Text color={'gray.400'}> / </Text>
+            <Text color={'gray.300'}>{item.deaths}</Text>
+            <Text color={'gray.400'}> / </Text>
+            <Text color={'gray.300'}>{item.assists}</Text>
+          </HStack>
+          <Text color={'gray.300'} textAlign={'right'}>
+            {item.duration}
+          </Text>
+        </VStack>
+      </HStackAnimated>
+    )
+  }
 
   return (
     <VStack flex={1}>
       <Text color={'gray.300'} mb={2}>
-        MATCHES
+        {t('recent_matches').toUpperCase()}
       </Text>
 
       {matches.length ? (
@@ -145,110 +265,7 @@ export function RecentMatches({ userId }: MatchesProps) {
           )}
           initialNumToRender={10}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <HStackAnimated
-              space={4}
-              alignItems={'center'}
-              entering={FadeInUp.delay(index * 100)}
-            >
-              <HStack space={2} width={'2/5'} alignItems={'center'}>
-                <Image
-                  source={{
-                    uri: item.heroAvatar,
-                    width: 10 * 4,
-                    height: 10 * 4,
-                  }}
-                  alt={item.heroName}
-                  width={10}
-                  h={10}
-                  rounded={'full'}
-                  resizeMode="cover"
-                />
-                <VStack flex={1}>
-                  <Text color={'gray.300'} flexShrink={1} isTruncated={true}>
-                    {item.heroName}
-                  </Text>
-                  <Text color={'gray.300'}>Level: {item.level}</Text>
-                </VStack>
-              </HStack>
-
-              <Text color={item.win ? 'green.600' : 'red.500'}>
-                {item.win ? 'Won' : 'Lost'}
-              </Text>
-
-              <VStack space={'0.5'}>
-                <HStack space={'0.5'} justifyContent={'space-between'}>
-                  {item.items.slice(0, 3).map((itemAux, itemAuxIndex) => (
-                    <Box
-                      w={4}
-                      h={4}
-                      overflow={'hidden'}
-                      borderWidth={1}
-                      borderColor={'gray.500'}
-                      rounded={'sm'}
-                      bg={'gray.700'}
-                      key={`item-${itemAuxIndex}`}
-                    >
-                      {itemAux?.img && (
-                        <Image
-                          source={{
-                            uri: itemAux.img,
-                            width: 4 * 4,
-                            height: 4 * 4,
-                          }}
-                          resizeMode="cover"
-                          alt={itemAux?.name}
-                          w={'full'}
-                          h={'full'}
-                        />
-                      )}
-                    </Box>
-                  ))}
-                </HStack>
-
-                <HStack space={'0.5'} justifyContent={'space-between'}>
-                  {item.items.slice(3, 6).map((itemAux, itemAuxIndex) => (
-                    <Box
-                      w={4}
-                      h={4}
-                      overflow={'hidden'}
-                      borderWidth={1}
-                      borderColor={'gray.500'}
-                      rounded={'sm'}
-                      bg={'gray.700'}
-                      key={`item-${itemAuxIndex}`}
-                    >
-                      {itemAux?.img && (
-                        <Image
-                          source={{
-                            uri: itemAux.img,
-                            width: 4 * 4,
-                            height: 4 * 4,
-                          }}
-                          alt={itemAux?.name}
-                          w={'full'}
-                          h={'full'}
-                        />
-                      )}
-                    </Box>
-                  ))}
-                </HStack>
-              </VStack>
-
-              <VStack marginLeft={'auto'}>
-                <HStack>
-                  <Text color={'gray.300'}>{item.kills}</Text>
-                  <Text color={'gray.400'}> / </Text>
-                  <Text color={'gray.300'}>{item.deaths}</Text>
-                  <Text color={'gray.400'}> / </Text>
-                  <Text color={'gray.300'}>{item.assists}</Text>
-                </HStack>
-                <Text color={'gray.300'} textAlign={'right'}>
-                  {item.duration}
-                </Text>
-              </VStack>
-            </HStackAnimated>
-          )}
+          renderItem={renderItem}
         />
       ) : (
         <ScrollView>

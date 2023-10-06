@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 
 type Props = IButtonProps & {
   title?: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function Button({ title, children, disabled, ...rest }: Props) {

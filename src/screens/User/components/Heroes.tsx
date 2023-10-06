@@ -7,12 +7,14 @@ import {
   Skeleton,
   Text,
   VStack,
+  useToast,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 
 import { api } from '../../../service/api'
 import { useHeroes } from '../../../hook/useHeroes'
 import Animated, { FadeInRight } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 
 const VStackAnimated = Animated.createAnimatedComponent(VStack)
 
@@ -36,6 +38,9 @@ export function Heroes({ userId }: CountsProps) {
   const [heroes, setHeroes] = useState<Hero[]>([])
 
   const { heroes: totalHeroes, isLoading } = useHeroes()
+
+  const toast = useToast()
+  const { t } = useTranslation()
 
   useEffect(() => {
     async function loadCounts() {
@@ -61,19 +66,27 @@ export function Heroes({ userId }: CountsProps) {
           }),
         )
       } catch (e) {
-        console.log(e)
+        toast.closeAll()
+
+        toast.show({
+          title: t('sorry_there_was_a_server_error'),
+          placement: 'top',
+          bgColor: 'red.500',
+        })
       }
     }
 
     if (!isLoading) {
       loadCounts()
     }
-  }, [userId, isLoading, totalHeroes])
+  }, [userId, isLoading, totalHeroes, t])
 
   return (
-    <VStack>
+    <VStack mt={2}>
       <Text color={'gray.300'} mb={2}>
-        HEROES (win / lose / winrate)
+        {`${t('heroes').toUpperCase()} (${t('win')} / ${t('loss')} / ${t(
+          'winrate',
+        )})`}
       </Text>
       {heroes.length ? (
         <FlatList
@@ -107,7 +120,7 @@ export function Heroes({ userId }: CountsProps) {
               />
 
               <Text color={'gray.300'} fontSize={'sm'} textAlign={'center'}>
-                {item.name}
+                {t(item.name)}
               </Text>
 
               <HStack>
@@ -123,46 +136,6 @@ export function Heroes({ userId }: CountsProps) {
           )}
         />
       ) : (
-        // <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        //   {heroes.map((hero, index) => (
-        //     <VStackAnimated
-        //       borderWidth={1}
-        //       borderColor={'gray.500'}
-        //       rounded={'md'}
-        //       alignItems={'center'}
-        //       justifyContent={'space-between'}
-        //       p={2}
-        //       minW={'32'}
-        //       mr={index !== heroes.length - 1 ? '4' : 0}
-        //       key={hero.hero_id}
-        //       entering={FadeInRight.delay(index * 100)}
-        //     >
-        //       <Image
-        //         source={{
-        //           uri: hero.avatar,
-        //         }}
-        //         alt={hero.name}
-        //         width={12}
-        //         height={12}
-        //         rounded={'sm'}
-        //       />
-
-        //       <Text color={'gray.300'} fontSize={'sm'} textAlign={'center'}>
-        //         {hero.name}
-        //       </Text>
-
-        //       <HStack>
-        //         <Text color={'green.600'}>{hero.win}</Text>
-        //         <Text color={'gray.400'}> / </Text>
-        //         <Text color={'red.500'}>{hero.games - hero.win}</Text>
-        //         <Text color={'gray.400'}> / </Text>
-        //         <Text
-        //           color={hero.winRate >= 50 ? 'green.600' : 'red.500'}
-        //         >{`${hero.winRate.toFixed(2)}%`}</Text>
-        //       </HStack>
-        //     </VStackAnimated>
-        //   ))}
-        // </ScrollView>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {Array.from({ length: 10 }).map((_, index) => (
             <VStackAnimated
