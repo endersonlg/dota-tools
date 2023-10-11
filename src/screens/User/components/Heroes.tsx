@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { api } from '../../../service/api'
-import { useHeroes } from '../../../hook/useHeroes'
+import { useHeroesItems } from '../../../hook/useHeroesItems'
 import Animated, { FadeInRight } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 
@@ -37,7 +37,7 @@ interface CountsProps {
 export function Heroes({ userId }: CountsProps) {
   const [heroes, setHeroes] = useState<Hero[]>([])
 
-  const { heroes: totalHeroes, isLoading } = useHeroes()
+  const { heroes: totalHeroes, isLoading } = useHeroesItems()
 
   const toast = useToast()
   const { t } = useTranslation()

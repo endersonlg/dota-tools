@@ -16,12 +16,11 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 
 import { api } from '../../../service/api'
-import { useHeroes } from '../../../hook/useHeroes'
+import { useHeroesItems } from '../../../hook/useHeroesItems'
 import Animated, { FadeInUp } from 'react-native-reanimated'
-import { Item } from '../../../context/ItemsContext'
-import { useItems } from '../../../hook/useItems'
 import { useTranslation } from 'react-i18next'
 import { firstLetterUppercase } from '../../../utils/firstLetterUppercase'
+import { Item } from '../../../context/HeroesItemsContext'
 
 dayjs.extend(duration)
 
@@ -65,9 +64,7 @@ interface ResponseRecentMatch {
 export function RecentMatches({ userId }: MatchesProps) {
   const [matches, setMatches] = useState<Match[]>([])
 
-  const { heroes: totalHeroes, isLoading: isLoadingHeroes } = useHeroes()
-
-  const { items: totalItems, isLoading: isLoadingItems } = useItems()
+  const { heroes: totalHeroes, items: totalItems, isLoading } = useHeroesItems()
 
   const toast = useToast()
   const { t } = useTranslation()
@@ -136,10 +133,10 @@ export function RecentMatches({ userId }: MatchesProps) {
       }
     }
 
-    if (!isLoadingHeroes && !isLoadingItems) {
+    if (!isLoading) {
       loadMatches()
     }
-  }, [userId, isLoadingHeroes, totalHeroes, isLoadingItems, totalItems, t])
+  }, [userId, isLoading, totalHeroes, totalItems, t])
 
   function renderItem({ item, index }: ListRenderItemInfo<Match>) {
     return (

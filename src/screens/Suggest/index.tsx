@@ -7,9 +7,9 @@ import {
   VStack,
   useToast,
 } from 'native-base'
-import { useHeroes } from '../../hook/useHeroes'
+import { useHeroesItems } from '../../hook/useHeroesItems'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Hero } from '../../context/HeroesContext'
+import { Hero } from '../../context/HeroesItemsContext'
 import { TouchableOpacity, ListRenderItemInfo } from 'react-native'
 import { api } from '../../service/api'
 import Animated from 'react-native-reanimated'
@@ -63,7 +63,7 @@ export function Suggest() {
 
   const [matchup, setMatchup] = useState<Matchup[]>([])
 
-  const { heroes: totalHeroes } = useHeroes()
+  const { heroes: totalHeroes } = useHeroesItems()
 
   const toast = useToast()
   const { t } = useTranslation()

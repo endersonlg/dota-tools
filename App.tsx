@@ -9,8 +9,8 @@ import { StatusBar, View } from 'react-native'
 import { THEME } from './src/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Routes } from './src/routes'
-import { HeroesContextProvider } from './src/context/HeroesContext'
-import { ItemsContextProvider } from './src/context/ItemsContext'
+import { HeroesItemsContextProvider } from './src/context/HeroesItemsContext'
+
 import i18next from 'i18next'
 
 import 'dayjs/locale/pt-br'
@@ -30,16 +30,14 @@ export default function App() {
 
   return (
     <NativeBaseProvider theme={THEME} config={config}>
-      <HeroesContextProvider>
-        <ItemsContextProvider>
-          <StatusBar
-            barStyle={'light-content'}
-            backgroundColor={'transparent'}
-            translucent
-          />
-          {fontsLoaded ? <Routes /> : <View />}
-        </ItemsContextProvider>
-      </HeroesContextProvider>
+      <HeroesItemsContextProvider>
+        <StatusBar
+          barStyle={'light-content'}
+          backgroundColor={'transparent'}
+          translucent
+        />
+        {fontsLoaded ? <Routes /> : <View />}
+      </HeroesItemsContextProvider>
     </NativeBaseProvider>
   )
 }
