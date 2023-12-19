@@ -21,7 +21,7 @@ Dota Tools is an application developed to provide serious Dota 2 players with a 
 
 ### Prerequisites
 
-Ensure you have Node.js and Expo installed in your development environment.
+Ensure you have Node.js installed in your development environment.
 
 ### Installation
 
